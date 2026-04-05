@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>E-commerce XHR</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    #produtos { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 20px; }
+    .card { border: 1px solid #ccc; padding: 12px; border-radius: 8px; width: 200px; }
+    #status { color: gray; font-style: italic; }
+  </style>
+</head>
+<body>
+
+  <h1>Produtos do E-commerce</h1>
+  <button onclick="carregarProdutos()">Carregar Produtos</button>
+  <p id="status"></p>
+  <div id="produtos"></div>
+
+  <script>
+    function carregarProdutos() {
+      // 1. Feedback imediato ao usuário
+      document.getElementById("status").textContent = "Carregando...";
+
+      // 2. Criação do objeto XMLHttpRequest
+      const xhr = new XMLHttpRequest();
+
+      // 3. Configuração: método, URL e modo assíncrono (true)
+      xhr.open("GET", "https://fakestoreapi.com/products?limit=6", true);
+
+      // 4. Callback para mudanças de estado
+      xhr.onreadystatechange = function () {
+        console.log("readyState:", xhr.readyState); // 0,1,2,3,4
+
+        if (xhr.readyState === 4) {
+          if (xhr.status === 200) {
+            // 5. Sucesso: processa o JSON
+            const produtos = JSON.parse(xhr.responseText);
+            renderizarProdutos(produtos);
+            document.getElementById("status").textContent = 
+              `${produtos.length} produtos carregados com sucesso.`;
+          } else {
+            // Erro HTTP
+            document.getElementById("status").textContent = 
+              "Erro ao carregar produtos: " + xhr.status;
+          }
+        }
+      };
+
+      // Tratamento de erro de rede
+      xhr.onerror = function () {
+        document.getElementById("status").textContent = "Erro de conexão.";
+      };
+
+      // 6. Envio da requisição (acontece de forma assíncrona)
+      xhr.send();
+    }
+
+    function renderizarProdutos(produtos) {
+      const container = document.getElementById("produtos");
+      container.innerHTML = ""; // limpa antes de renderizar
+
+      produtos.forEach(function (produto) {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <img src="${produto.image}" alt="${produto.title}" 
+               style="width:100%;height:120px;object-fit:contain">
+          <h4 style="font-size:13px">${produto.title}</h4>
+          <p><strong>R$ ${produto.price}</strong></p>
+        `;
+        container.appendChild(card);
+      });
+    }
+  </script>
+
+</body>
+</html>
